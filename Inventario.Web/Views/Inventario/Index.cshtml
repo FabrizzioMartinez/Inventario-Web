@@ -1,0 +1,310 @@
+﻿@model IEnumerable<Inventario.Entity.MovInventario>
+
+@{
+    ViewBag.Title = "Gestión de Inventario";
+}
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f5f7fa, #e4ecf5);
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        font-size: 14px;
+    }
+
+    h2 {
+        font-weight: 600;
+        color: #1f2d3d;
+        margin: 0;
+    }
+
+    .page-header {
+        background: white;
+        padding: 20px 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-nuevo {
+        background: linear-gradient(135deg, #28a745, #218838);
+        border: none;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transition: all 0.2s ease;
+    }
+
+        .btn-nuevo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+        }
+
+    .panel-custom {
+        border: none;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+    }
+
+    .panel-body {
+        padding: 20px !important;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+    }
+
+    .table thead {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+    }
+
+        .table thead th {
+            border: none !important;
+            padding: 14px !important;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+        .table tbody tr:hover {
+            background-color: #f1f5f9;
+            transform: scale(1.002);
+        }
+
+    .table tbody td {
+        padding: 12px !important;
+        vertical-align: middle !important;
+    }
+
+    .btn-group .btn {
+        border-radius: 6px !important;
+        transition: 0.2s ease;
+    }
+
+        .btn-group .btn:hover {
+            transform: translateY(-1px);
+        }
+
+    .modal-content {
+        border-radius: 16px;
+        border: none;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #1f2d3d, #2c3e50);
+        color: white;
+        padding: 18px 25px;
+        border: none;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+    .modal-footer {
+        background: #f8f9fa;
+        padding: 15px 25px;
+        border: none;
+    }
+
+        .modal-footer .btn-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+        }
+
+            .modal-footer .btn-primary:hover {
+                transform: translateY(-2px);
+            }
+</style>
+
+<div class="container-fluid" style="padding: 0 30px;">
+    <div class="page-header">
+        <h2><i class="glyphicon glyphicon-transfer text-primary"></i> Movimientos de Almacén</h2>
+        <button type="button" class="btn btn-success btn-lg btn-nuevo" onclick="AbrirModalCrear()">
+            <i class="glyphicon glyphicon-plus"></i> NUEVO REGISTRO
+        </button>
+    </div>
+
+    <div class="panel panel-default panel-custom">
+        <div class="panel-body">
+            @using (Html.BeginForm("Index", "Inventario", FormMethod.Get, new { @class = "form-inline" }))
+            {
+                <div class="row">
+                    <div class="form-group col-md-3">
+                        <label class="small text-muted">FECHA INICIO</label><br />
+                        <input type="date" name="inicio" class="form-control" style="width:100%" />
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label class="small text-muted">FECHA FIN</label><br />
+                        <input type="date" name="fin" class="form-control" style="width:100%" />
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="small text-muted">BÚSQUEDA RÁPIDA</label><br />
+                        <input type="text" name="nroDoc" class="form-control" style="width:100%" placeholder="Nro. Documento o Proveedor..." />
+                    </div>
+                    <div class="col-md-2 text-right">
+                        <label>&nbsp;</label><br />
+                        <button type="submit" class="btn btn-primary btn-block" style="font-weight:bold;">
+                            <i class="glyphicon glyphicon-search"></i> FILTRAR
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="table table-hover text-center" id="tablaInventario">
+            <thead>
+                <tr>
+                    <th>Correlativo</th>
+                    <th>Almacén</th>
+                    <th>Tipo Doc.</th>
+                    <th>Nro. Documento</th>
+                    <th>Producto / Ítem</th>
+                    <th>Proveedor</th>
+                    <th>Fecha</th>
+                    <th>Cant.</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.OrderBy(m => m.FECHA_TRANSACCION))
+                {
+                    <tr>
+                        <td>@item.COD_CIA</td>
+                        <td class="text-muted">@item.NombreAlmacen</td>
+                        <td>@item.NombreTipoDoc</td>
+                        <td>@item.NRO_DOCUMENTO</td>
+                        <td>@item.NombreItem</td>
+                        <td class="text-muted small">@item.NombreProveedor</td>
+                        <td>@item.FECHA_TRANSACCION.ToString("dd/MM/yyyy")</td>
+                        <td>@item.CANTIDAD</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-light btn-sm shadow-sm" style="margin-right:5px;"
+                                        onclick="AbrirModalEditar('@item.COD_CIA', '@item.COMPANIA_VENTA_3', '@item.ALMACEN_VENTA', '@item.TIPO_MOVIMIENTO', '@item.TIPO_DOCUMENTO', '@item.NRO_DOCUMENTO', '@item.COD_ITEM_2')">
+                                    <i class="glyphicon glyphicon-pencil text-warning"></i>
+                                </button>
+                                <button class="btn btn-light btn-sm shadow-sm"
+                                        onclick="Eliminar('@item.COD_CIA', '@item.COMPANIA_VENTA_3', '@item.ALMACEN_VENTA', '@item.TIPO_MOVIMIENTO', '@item.TIPO_DOCUMENTO', '@item.NRO_DOCUMENTO', '@item.COD_ITEM_2')">
+                                    <i class="glyphicon glyphicon-trash text-danger"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal" id="modalInventario" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header">
+                <h4 class="modal-title" id="tituloModal"><i class="glyphicon glyphicon-edit"></i> Gestión de Movimiento</h4>
+            </div>
+            <div class="modal-body">
+                <div id="contenedorFormulario"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-link text-muted" style="text-decoration:none;" onclick="ForzarCierreModal()">CANCELAR</button>
+                <button type="button" class="btn btn-primary btn-lg" style="min-width: 180px; font-weight:bold;" onclick="Guardar()">
+                    <i class="glyphicon glyphicon-save"></i> GUARDAR REGISTRO
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        var esModificacion = false;
+
+        function AbrirModalCrear() {
+            esModificacion = false;
+            $("#modalInventario").modal("show");
+            $("#tituloModal").html('<i class="glyphicon glyphicon-plus"></i> Nuevo Registro de Movimiento');
+            $("#contenedorFormulario").html('<div class="text-center"><br/><i class="glyphicon glyphicon-refresh"></i> Cargando...</div>');
+
+            $.get('@Url.Action("GetCorrelativo", "Inventario")', function (data) {
+                $.get('@Url.Action("Nuevo", "Inventario")', function (html) {
+                    $("#contenedorFormulario").html(html);
+                    $("#txtCorrelativo").val(data.correlativo);
+                    $("#contenedorFormulario select").prop("disabled", false);
+                    $("#contenedorFormulario input[name='NRO_DOCUMENTO']").prop("disabled", false);
+                });
+            });
+        }
+
+        function AbrirModalEditar(cia, cia3, alm, tmov, tdoc, ndoc, item) {
+            esModificacion = true;
+            $("#modalInventario").modal("show");
+            $("#tituloModal").html('<i class="glyphicon glyphicon-pencil"></i> Modificar Movimiento');
+            $("#contenedorFormulario").html('<div class="text-center"><br/><i class="glyphicon glyphicon-refresh"></i> Cargando...</div>');
+
+            $.get('@Url.Action("Editar", "Inventario")', {
+                cia: cia, cia3: cia3, alm: alm, tmov: tmov, tdoc: tdoc, ndoc: ndoc, item: item
+            }, function (html) {
+                $("#contenedorFormulario").html(html);
+            });
+        }
+
+        function Guardar() {
+            var form = $("#formMovimiento");
+            if (!form[0].checkValidity()) { form[0].reportValidity(); return; }
+
+            var dataEnviar = form.serialize() + "&esEdicion=" + esModificacion;
+
+            $.ajax({
+                url: '@Url.Action("Guardar", "Inventario")',
+                type: 'POST',
+                data: dataEnviar,
+                success: function (res) {
+                    if (res.success) location.reload();
+                    else alert(res.message || "No se pudo actualizar el registro.");
+                },
+                error: function() {
+                    alert("Error crítico de conexión con el servidor.");
+                }
+            });
+        }
+
+        function Eliminar(cia, cia3, alm, tmov, tdoc, ndoc, item) {
+            if (confirm("¿Está seguro de eliminar este registro permanentemente?")) {
+                $.post('@Url.Action("Delete", "Inventario")', {
+                    cia: cia, cia3: cia3, alm: alm, tmov: tmov, tdoc: tdoc, ndoc: ndoc, item: item
+                }, function (res) {
+                    if (res.success) location.reload();
+                    else alert(res.message);
+                });
+            }
+        }
+
+        function ForzarCierreModal() {
+            $('#modalInventario').modal('hide');
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open').css('padding-right', '0');
+        }
+    </script>
+}

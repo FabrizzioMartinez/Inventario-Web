@@ -1,0 +1,170 @@
+﻿@model Inventario.Entity.MovInventario
+
+@{
+    bool esEdicion = Model.EsEdicion;
+    if (ViewBag.EsEdicion != null)
+    {
+        bool.TryParse(ViewBag.EsEdicion.ToString(), out esEdicion);
+    }
+}
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "formMovimiento" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.Hidden("esEdicion", esEdicion)
+    @ViewBag.EsEdicion
+
+    if (esEdicion)
+    {
+        @Html.HiddenFor(m => m.COMPANIA_VENTA_3)
+        @Html.HiddenFor(m => m.ALMACEN_VENTA)
+        @Html.HiddenFor(m => m.TIPO_MOVIMIENTO)
+        @Html.HiddenFor(m => m.TIPO_DOCUMENTO)
+        @Html.HiddenFor(m => m.NRO_DOCUMENTO)
+        @Html.HiddenFor(m => m.COD_ITEM_2)
+    }
+
+    @Html.HiddenFor(m => m.COD_CIA)
+
+    <div class="container-fluid" style="padding:10px;">
+
+        <div class="row">
+            <div class="col-md-4 form-group">
+                <label class="font-weight-bold text-primary small">Correlativo Interno</label>
+                @Html.TextBoxFor(m => m.COD_CIA, new
+                {
+                    @class = "form-control",
+                    @readonly = "readonly",
+                    disabled = "disabled",
+                    @id = "txtCorrelativo",
+                    style = "background-color:#eee;"
+                })
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label class="font-weight-bold small">Compañía Venta</label>
+                @Html.DropDownListFor(m => m.COMPANIA_VENTA_3,
+                    ViewBag.Ciavt_List as SelectList,
+                    "-- Seleccione --",
+                    new
+                    {
+                        @class = "form-control",
+                        required = "required",
+                        disabled = esEdicion ? "disabled" : null
+                    })
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label class="font-weight-bold small">Almacén Origen</label>
+                @Html.DropDownListFor(m => m.ALMACEN_VENTA,
+                    ViewBag.Almacenes_List as SelectList,
+                    "-- Seleccione --",
+                    new
+                    {
+                        @class = "form-control",
+                        required = "required",
+                        disabled = esEdicion ? "disabled" : null
+                    })
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 form-group">
+                <label class="font-weight-bold small">Tipo Movimiento</label>
+                @Html.DropDownListFor(m => m.TIPO_MOVIMIENTO,
+                    ViewBag.TiposMov_List as SelectList,
+                    "-- Seleccione --",
+                    new
+                    {
+                        @class = "form-control",
+                        required = "required",
+                        disabled = esEdicion ? "disabled" : null
+                    })
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label class="font-weight-bold small">Tipo Documento</label>
+                @Html.DropDownListFor(m => m.TIPO_DOCUMENTO,
+                    ViewBag.TiposDoc_List as SelectList,
+                    "-- Seleccione --",
+                    new
+                    {
+                        @class = "form-control",
+                        required = "required",
+                        disabled = esEdicion ? "disabled" : null
+                    })
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label class="font-weight-bold small">Nro. Documento</label>
+                @Html.TextBoxFor(m => m.NRO_DOCUMENTO, new
+                {
+                    @class = "form-control",
+                    required = "required",
+                    disabled = esEdicion ? "disabled" : null
+                })
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 form-group">
+                <label class="font-weight-bold small">Producto / Ítem</label>
+                @Html.DropDownListFor(m => m.COD_ITEM_2,
+                    ViewBag.Items_List as SelectList,
+                    "-- Seleccione --",
+                    new
+                    {
+                        @class = "form-control",
+                        required = "required",
+                        disabled = esEdicion ? "disabled" : null
+                    })
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label class="font-weight-bold small">Cantidad</label>
+                @Html.TextBoxFor(m => m.CANTIDAD, new
+                {
+                    @class = "form-control",
+                    type = "number",
+                    min = "1",
+                    step = "0.01",
+                    required = "required"
+                })
+            </div>
+
+            <div class="col-md-4 form-group">
+                <label class="font-weight-bold small">Fecha Transacción</label>
+                <input type="date"
+                       name="FECHA_TRANSACCION"
+                       class="form-control"
+                       required
+                       value="@(Model.FECHA_TRANSACCION > DateTime.MinValue
+                                ? Model.FECHA_TRANSACCION.ToString("yyyy-MM-dd")
+                                : DateTime.Now.ToString("yyyy-MM-dd"))" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label class="font-weight-bold small">Proveedor</label>
+                @Html.DropDownListFor(m => m.PROVEEDOR,
+                    ViewBag.Proveedores_List as SelectList,
+                    "-- Seleccione --",
+                    new
+                    {
+                        @class = "form-control",
+                        required = "required"
+                    })
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label class="font-weight-bold small">Almacén Destino (Opcional)</label>
+                @Html.DropDownListFor(m => m.ALMACEN_DESTINO,
+                    ViewBag.Almacenes_List as SelectList,
+                    "-- Ninguno --",
+                    new { @class = "form-control" })
+            </div>
+        </div>
+
+    </div>
+}
